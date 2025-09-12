@@ -1,0 +1,19 @@
+variable "service_name" {
+  description = "Service Name"
+  type        = string
+}
+
+variable "environment" {
+  description = "Environment"
+  type        = string
+}
+
+variable "vpc_id" { type = string }
+
+variable "private_subnet_id" { type = string }
+
+variable "target_group_arn" { type = string }
+
+variable "alb_security_group_id" { type = string }
+
+variable "internal_alb_dns_name" { type = string }
