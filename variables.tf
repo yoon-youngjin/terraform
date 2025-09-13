@@ -16,7 +16,12 @@ variable "username" {
 }
 
 variable "password" {
-  description   = "RDS master password"
-  type      = string
-  sensitive = true
+  description = "RDS master password"
+  type        = string
+  sensitive   = true
+}
+
+variable "bastion_allowed_ssh_cidrs" {
+  description = "CIDR blocks allowed to SSH into bastion host"
+  type        = list(string)
 }

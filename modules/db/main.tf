@@ -25,9 +25,10 @@ resource "aws_security_group" "db" {
   }
 }
 
-resource "aws_vpc_security_group_ingress_rule" "db_inbound_from_sg" {
+resource "aws_vpc_security_group_ingress_rule" "db_inbound_from_sgs" {
+  for_each                     = var.allowed_sg_ids
   security_group_id            = aws_security_group.db.id
-  referenced_security_group_id = var.allowed_sg_ids[0]
+  referenced_security_group_id = each.value
   ip_protocol                  = "tcp"
   from_port                    = 3306
   to_port                      = 3306
