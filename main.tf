@@ -31,16 +31,27 @@ module "external_alb" {
   subnet_ids   = module.network.public_subnet_ids
 }
 
+module "bastion" {
+  source = "./modules/bastion"
+
+  service_name      = var.service_name
+  environment       = var.environment
+  public_subnet_id  = module.network.public_subnet_ids[0]
+  vpc_id            = module.network.vpc_id
+  allowed_ssh_cidrs = var.bastion_allowed_ssh_cidrs
+}
+
 module "web" {
   source = "./modules/web"
 
-  service_name          = var.service_name
-  environment           = var.environment
-  vpc_id                = module.network.vpc_id
-  private_subnet_id     = module.network.web_private_subnet_ids[0] # 일단 한개만 생성
-  target_group_arn      = module.external_alb.alb_target_group_arn
-  alb_security_group_id = module.external_alb.alb_security_group_id
-  internal_alb_dns_name = module.internal_alb.alb_dns_name
+  service_name              = var.service_name
+  environment               = var.environment
+  vpc_id                    = module.network.vpc_id
+  private_subnet_id         = module.network.web_private_subnet_ids[0] # 일단 한개만 생성
+  target_group_arn          = module.external_alb.alb_target_group_arn
+  alb_security_group_id     = module.external_alb.alb_security_group_id
+  internal_alb_dns_name     = module.internal_alb.alb_dns_name
+  bastion_security_group_id = module.bastion.bastion_security_group_id
 }
 
 module "internal_alb" {
@@ -57,23 +68,27 @@ module "internal_alb" {
 module "was" {
   source = "./modules/was"
 
-  service_name          = var.service_name
-  environment           = var.environment
-  vpc_id                = module.network.vpc_id
-  private_subnet_id     = module.network.was_private_subnet_ids[0] # 일단 한개만 생성
-  target_group_arn      = module.internal_alb.alb_target_group_arn
-  alb_security_group_id = module.internal_alb.alb_security_group_id
-  ec2_instance_type     = var.ec2_instance_type
+  service_name              = var.service_name
+  environment               = var.environment
+  vpc_id                    = module.network.vpc_id
+  private_subnet_id         = module.network.was_private_subnet_ids[0] # 일단 한개만 생성
+  target_group_arn          = module.internal_alb.alb_target_group_arn
+  alb_security_group_id     = module.internal_alb.alb_security_group_id
+  ec2_instance_type         = var.ec2_instance_type
+  bastion_security_group_id = module.bastion.bastion_security_group_id
 }
 
 module "db" {
   source = "./modules/db"
 
-  service_name      = var.service_name
-  environment       = var.environment
-  vpc_id            = module.network.vpc_id
-  allowed_sg_ids    = [module.was.was_security_group_id]
+  service_name   = var.service_name
+  environment    = var.environment
+  vpc_id         = module.network.vpc_id
+  allowed_sg_ids = {
+    was     = module.was.was_security_group_id
+    bastion = module.bastion.bastion_security_group_id
+  }
   private_subnet_ids = module.network.db_private_subnet_ids
-  username          = var.username
-  password          = var.password
+  username           = var.username
+  password           = var.password
 }

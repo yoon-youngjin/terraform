@@ -19,7 +19,7 @@ variable "private_subnet_ids" {
 }
 
 variable "allowed_sg_ids" {
-  type = list(string)
+  type = map(string)
 }
 
 variable "instance_class" {
