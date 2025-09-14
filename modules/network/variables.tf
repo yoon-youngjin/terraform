@@ -17,3 +17,7 @@ variable "az_names" {
   type    = list(string)
   default = ["ap-northeast-2a", "ap-northeast-2c"]
 }
+
+variable "allowed_ssh_cidr" {
+  type = string
+}

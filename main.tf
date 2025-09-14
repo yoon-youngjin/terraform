@@ -16,9 +16,10 @@ provider "aws" {
 module "network" {
   source = "./modules/network"
 
-  service_name = var.service_name
-  vpc_cidr     = "10.23.0.0/16"
-  environment  = var.environment
+  service_name     = var.service_name
+  vpc_cidr         = "10.23.0.0/16"
+  environment      = var.environment
+  allowed_ssh_cidr = var.allowed_ssh_cidrs[0]
 }
 
 module "external_alb" {
@@ -38,7 +39,7 @@ module "bastion" {
   environment       = var.environment
   public_subnet_id  = module.network.public_subnet_ids[0]
   vpc_id            = module.network.vpc_id
-  allowed_ssh_cidrs = var.bastion_allowed_ssh_cidrs
+  allowed_ssh_cidrs = var.allowed_ssh_cidrs
 }
 
 module "web" {

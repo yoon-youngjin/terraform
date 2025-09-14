@@ -21,7 +21,7 @@ variable "password" {
   sensitive   = true
 }
 
-variable "bastion_allowed_ssh_cidrs" {
+variable "allowed_ssh_cidrs" {
   description = "CIDR blocks allowed to SSH into bastion host"
   type        = list(string)
 }
