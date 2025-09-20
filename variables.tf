@@ -25,3 +25,7 @@ variable "allowed_ssh_cidrs" {
   description = "CIDR blocks allowed to SSH into bastion host"
   type        = list(string)
 }
+
+variable "acm_certificate_arn" {
+  type = string
+}

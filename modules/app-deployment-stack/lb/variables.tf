@@ -26,3 +26,12 @@ variable "target_group_port" {
   type    = string
   default = "80"
 }
+
+variable "domain_name" {
+  type    = string
+  default = "*.dummycash.com"
+}
+
+variable "acm_certificate_arn" {
+  type    = string
+}

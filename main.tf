@@ -23,14 +23,15 @@ module "network" {
 }
 
 module "external_alb" {
-  source = "./modules/lb"
+  source = "./modules/app-deployment-stack/lb"
 
-  service_name      = var.service_name
-  environment       = var.environment
-  vpc_id            = module.network.vpc_id
-  isInternal        = false
-  subnet_ids        = module.network.public_subnet_ids
-  target_group_port = "8080"
+  service_name        = var.service_name
+  environment         = var.environment
+  vpc_id              = module.network.vpc_id
+  isInternal          = false
+  subnet_ids          = module.network.public_subnet_ids
+  target_group_port   = "80"
+  acm_certificate_arn = var.acm_certificate_arn
 }
 
 module "bastion" {
@@ -44,7 +45,7 @@ module "bastion" {
 }
 
 module "was" {
-  source = "./modules/was"
+  source = "./modules/app-deployment-stack/was"
 
   service_name              = var.service_name
   environment               = var.environment

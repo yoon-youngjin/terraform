@@ -75,7 +75,8 @@ resource "aws_network_acl_rule" "public_outbound_allow_rule" {
   network_acl_id = aws_network_acl.public.id
   protocol       = "-1"
   rule_action    = "allow"
-  rule_number    = 100
+  rule_number    = 130
+  egress         = true
   cidr_block     = "0.0.0.0/0"
   from_port      = 0
   to_port        = 0
