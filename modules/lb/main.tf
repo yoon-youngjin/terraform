@@ -1,5 +1,5 @@
 resource "aws_security_group" "alb" {
-  name   = "${var.service_name}-${var.isInternal ? "internal" : "external"}-alb-sg"
+  name   = "${var.service_name}-external-alb-sg"
   vpc_id = var.vpc_id
 
   ingress {
@@ -16,26 +16,26 @@ resource "aws_security_group" "alb" {
   }
 
   tags = {
-    Name        = "${var.service_name}-${var.isInternal ? "internal" : "external"}-alb-sg"
+    Name        = "${var.service_name}-external-alb-sg"
     Environment = var.environment
   }
 }
 
 resource "aws_lb" "alb" {
-  name               = "${var.service_name}-${var.isInternal ? "internal" : "external"}-alb"
+  name               = "${var.service_name}-external-alb"
   load_balancer_type = "application"
   internal           = var.isInternal
   security_groups    = [aws_security_group.alb.id]
   subnets            = var.subnet_ids
 
   tags = {
-    Name        = "${var.service_name}-${var.isInternal ? "internal" : "external"}-alb"
+    Name        = "${var.service_name}-external-alb"
     Environment = var.environment
   }
 }
 
 resource "aws_lb_target_group" "tg" {
-  name     = "${var.service_name}-${var.isInternal ? "internal" : "external"}-tg"
+  name     = "${var.service_name}-external-tg"
   port     = var.target_group_port
   protocol = "HTTP"
   vpc_id   = var.vpc_id
@@ -45,7 +45,7 @@ resource "aws_lb_target_group" "tg" {
   }
 
   tags = {
-    Name        = "${var.service_name}-${var.isInternal ? "internal" : "external"}-tg"
+    Name        = "${var.service_name}-external-tg"
     Environment = var.environment
   }
 }
