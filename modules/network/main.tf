@@ -65,7 +65,7 @@ resource "aws_network_acl_rule" "public_inbound_allow_rule" {
   rule_action    = "allow"
   rule_number    = each.value.rule_number # 숫자가 낮을수록 먼저 평가여
   egress         = false
-  cidr_block     = each.value.cidr # 변수화
+  cidr_block     = each.value.cidr
   from_port      = each.value.port
   to_port        = each.value.port
 }
@@ -138,28 +138,10 @@ resource "aws_route" "private_internet" {
   nat_gateway_id         = aws_nat_gateway.nat.id
 }
 
-resource "aws_route_table_association" "web_private_association" {
-  for_each       = aws_subnet.web_private_subnet
-  subnet_id      = each.value.id
-  route_table_id = aws_route_table.private.id
-}
-
 resource "aws_route_table_association" "was_private_association" {
   for_each       = aws_subnet.was_private_subnet
   subnet_id      = each.value.id
   route_table_id = aws_route_table.private.id
-}
-
-resource "aws_subnet" "web_private_subnet" {
-  for_each          = toset(var.az_names)
-  vpc_id            = aws_vpc.this.id
-  cidr_block        = cidrsubnet(var.vpc_cidr, 8, 100 + index(var.az_names, each.value))
-  availability_zone = each.value
-
-  tags = {
-    Name        = "${var.service_name}-web-private-subnet-${each.value}"
-    Environment = var.environment
-  }
 }
 
 resource "aws_subnet" "was_private_subnet" {

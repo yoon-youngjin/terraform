@@ -13,11 +13,6 @@ output "igw_id" {
   value       = aws_internet_gateway.igw.id
 }
 
-output "web_private_subnet_ids" {
-  description = "ID of web private subnets"
-  value       = [for s in aws_subnet.web_private_subnet : s.id]
-}
-
 output "was_private_subnet_ids" {
   description = "ID of was private subnets"
   value       = [for s in aws_subnet.was_private_subnet : s.id]
