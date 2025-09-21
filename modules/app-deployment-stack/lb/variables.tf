@@ -30,6 +30,11 @@ variable "target_group_port" {
   default = "80"
 }
 
+variable "base_domain" {
+  type = string
+  default = "dummycash.com"
+}
+
 variable "domain_name" {
   type    = string
   default = "*.dummycash.com"

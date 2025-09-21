@@ -68,3 +68,20 @@ resource "aws_lb_listener" "https" {
     target_group_arn = aws_lb_target_group.tg.arn
   }
 }
+
+resource "aws_route53_zone" "main" {
+  name = var.base_domain
+}
+
+# record 추가
+resource "aws_route53_record" "alb" {
+  name    = var.domain_name
+  type    = "A"
+  zone_id = aws_route53_zone.main.zone_id
+
+  alias {
+    name                   = aws_lb.alb.dns_name
+    zone_id                = aws_lb.alb.zone_id
+    evaluate_target_health = true
+  }
+}
