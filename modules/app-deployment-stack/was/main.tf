@@ -1,5 +1,13 @@
+locals {
+  common_tags = {
+    Owner       = var.owner
+    Service     = var.service_name
+    Environment = var.environment
+  }
+}
+
 resource "aws_security_group" "was" {
-  name   = "${var.service_name}-was-sg"
+  name   = "${var.service_name}-${var.environment}-was-sg"
   vpc_id = var.vpc_id
 
   ingress {
@@ -30,10 +38,9 @@ resource "aws_security_group" "was" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name        = "${var.service_name}-was-sg"
-    Environment = var.environment
-  }
+  tags = merge(local.common_tags, {
+    Name = "${var.service_name}-${var.environment}-was-sg"
+  })
 }
 
 data "aws_ami" "standard" {
@@ -52,7 +59,7 @@ data "aws_ami" "standard" {
 }
 
 resource "aws_launch_template" "was" {
-  name_prefix   = "${var.service_name}-was-"
+  name_prefix   = "${var.service_name}-${var.environment}-lt"
   image_id      = data.aws_ami.standard.id
   instance_type = var.ec2_instance_type
   key_name      = "dummy"
@@ -66,15 +73,16 @@ resource "aws_launch_template" "was" {
   tag_specifications {
     resource_type = "instance"
 
-    tags = {
-      Name        = "${var.service_name}-was"
-      Environment = var.environment
-    }
+    tags = merge(local.common_tags, {
+      Name       = "${var.service_name}-${var.environment}-was"
+      Platform   = var.platform
+      Github_Url = var.github_url
+    })
   }
 }
 
 resource "aws_autoscaling_group" "was" {
-  name                = "${var.service_name}-was-asg"
+  name                = "${var.service_name}-${var.environment}-asg"
   vpc_zone_identifier = [var.private_subnet_id]
   target_group_arns   = [var.target_group_arn]
   health_check_type   = "ELB"
@@ -93,5 +101,29 @@ resource "aws_autoscaling_group" "was" {
     preferences {
       min_healthy_percentage = 50
     }
+  }
+
+  tag {
+    key                 = "Owner"
+    propagate_at_launch = false
+    value               = var.owner
+  }
+
+  tag {
+    key                 = "Service"
+    propagate_at_launch = false
+    value               = var.service_name
+  }
+
+  tag {
+    key                 = "Environment"
+    propagate_at_launch = false
+    value               = var.environment
+  }
+
+  tag {
+    key                 = "Name"
+    propagate_at_launch = false
+    value               = "${var.service_name}-${var.environment}-asg"
   }
 }

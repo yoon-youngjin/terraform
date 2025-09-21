@@ -1,3 +1,15 @@
+variable "owner" {
+  type = string
+}
+
+variable "platform" {
+  type = string
+}
+
+variable "github_url" {
+  type = string
+}
+
 variable "service_name" {
   description = "Service Name"
   type        = string
