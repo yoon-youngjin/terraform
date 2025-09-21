@@ -1,11 +1,19 @@
+locals {
+  common_tags = {
+    Owner       = var.owner
+    Project     = var.project_name
+    Environment = var.environment
+  }
+}
+
 resource "aws_security_group" "bastion" {
-  name   = "${var.service_name}-bastion-sg"
+  name   = "${var.project_name}-${var.environment}-bastion-sg"
   vpc_id = var.vpc_id
 
   ingress {
-    from_port       = 22
-    to_port         = 22
-    protocol        = "tcp"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
     cidr_blocks = var.allowed_ssh_cidrs
   }
   egress {
@@ -15,10 +23,9 @@ resource "aws_security_group" "bastion" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name        = "${var.service_name}-bastion-sg"
-    Environment = var.environment
-  }
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-bastion-sg"
+  })
 }
 
 resource "aws_instance" "this" {
@@ -30,8 +37,7 @@ resource "aws_instance" "this" {
   vpc_security_group_ids      = [aws_security_group.bastion.id]
   associate_public_ip_address = true
 
-  tags = {
-    Name        = "${var.service_name}-bastion"
-    Environment = var.environment
-  }
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-bastion"
+  })
 }

@@ -1,15 +1,17 @@
-variable "vpc_cidr" {
-  description = "IPv4 CIDR Block"
-  type        = string
-}
-
-variable "service_name" {
-  description = "Service Name"
-  type        = string
+variable "owner" {
+  type = string
 }
 
 variable "environment" {
-  description = "Environment"
+  type = string
+}
+
+variable "project_name" {
+  type = string
+}
+
+variable "vpc_cidr" {
+  description = "IPv4 CIDR Block"
   type        = string
 }
 

@@ -1,3 +1,15 @@
+variable "owner" {
+  type = string
+}
+
+variable "platform" {
+  type = string
+}
+
+variable "github_url" {
+  type = string
+}
+
 variable "service_name" {
   description = "Service Name"
   type        = string
@@ -19,3 +31,18 @@ variable "alb_security_group_id" { type = string }
 variable "ec2_instance_type" { type = string }
 
 variable "bastion_security_group_id" { type = string }
+
+variable "asg_min_capacity" {
+  type    = number
+  default = 1
+}
+
+variable "asg_max_capacity" {
+  type    = number
+  default = 1
+}
+
+variable "asg_desired_capacity" {
+  type    = number
+  default = 1
+}

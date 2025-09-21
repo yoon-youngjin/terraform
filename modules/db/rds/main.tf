@@ -1,15 +1,22 @@
-resource "aws_db_subnet_group" "this" {
-  name       = "${var.service_name}-db-subnet-group"
-  subnet_ids = var.private_subnet_ids
-
-  tags = {
-    Name        = "${var.service_name}-db-subnet-group"
+locals {
+  common_tags = {
+    Owner       = var.owner
+    Project     = var.project_name
     Environment = var.environment
   }
 }
 
+resource "aws_db_subnet_group" "this" {
+  name       = "${var.project_name}-${var.environment}-db-subnet-group"
+  subnet_ids = var.private_subnet_ids
+
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-db-subnet-group"
+  })
+}
+
 resource "aws_security_group" "db" {
-  name   = "${var.service_name}-db-sg"
+  name   = "${var.project_name}-${var.environment}-db-sg"
   vpc_id = var.vpc_id
 
   egress {
@@ -19,10 +26,9 @@ resource "aws_security_group" "db" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name        = "${var.service_name}-db-sg"
-    Environment = var.environment
-  }
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-db-sg"
+  })
 }
 
 resource "aws_vpc_security_group_ingress_rule" "db_inbound_from_sgs" {
@@ -35,7 +41,7 @@ resource "aws_vpc_security_group_ingress_rule" "db_inbound_from_sgs" {
 }
 
 resource "aws_db_instance" "this" {
-  identifier             = "${var.service_name}-db"
+  identifier             = "${var.project_name}-${var.environment}-db"
   engine                 = var.engine
   instance_class         = var.instance_class
   allocated_storage      = var.allocated_storage
@@ -46,8 +52,7 @@ resource "aws_db_instance" "this" {
   skip_final_snapshot    = true # RDS 인스턴스 삭제 시 최종 스냅샷 없이 종료
   multi_az               = false # 단일 AZ에만 배포
 
-  tags = {
-    Name        = "${var.service_name}-db"
-    Environment = var.environment
-  }
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-db"
+  })
 }

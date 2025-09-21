@@ -1,6 +1,9 @@
-variable "service_name" {
-  description = "Service Name"
-  type        = string
+variable "owner" {
+  type = string
+}
+
+variable "project_name" {
+  type = string
 }
 
 variable "environment" {
@@ -25,4 +28,18 @@ variable "subnet_ids" {
 variable "target_group_port" {
   type    = string
   default = "80"
+}
+
+variable "base_domain" {
+  type = string
+  default = "dummycash.com"
+}
+
+variable "domain_name" {
+  type    = string
+  default = "*.dummycash.com"
+}
+
+variable "acm_certificate_arn" {
+  type = string
 }

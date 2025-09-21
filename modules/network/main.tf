@@ -1,30 +1,36 @@
+locals {
+  common_tags = {
+    Owner       = var.owner
+    Project     = var.project_name
+    Environment = var.environment
+  }
+}
+
 resource "aws_vpc" "this" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true
   enable_dns_hostnames = true
 
-  tags = {
-    Name        = "${var.service_name}-vpc"
-    Environment = var.environment
-  }
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-vpc"
+  })
 }
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.this.id
-  tags   = {
-    Name        = "${var.service_name}-igw"
-    Environment = var.environment
-  }
+
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-igw"
+  })
 }
 
 # Public Route Table
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.this.id
 
-  tags = {
-    Name        = "${var.service_name}-rtb-public"
-    Environment = var.environment
-  }
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-public-rt"
+  })
 }
 
 # 0.0.0.0/0 -> IGW
@@ -44,10 +50,9 @@ resource "aws_route_table_association" "public_association" {
 resource "aws_network_acl" "public" {
   vpc_id = aws_vpc.this.id
 
-  tags = {
-    Name        = "${var.service_name}-nacl-public"
-    Environment = var.environment
-  }
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-nacl"
+  })
 }
 
 locals {
@@ -75,7 +80,8 @@ resource "aws_network_acl_rule" "public_outbound_allow_rule" {
   network_acl_id = aws_network_acl.public.id
   protocol       = "-1"
   rule_action    = "allow"
-  rule_number    = 100
+  rule_number    = 130
+  egress         = true
   cidr_block     = "0.0.0.0/0"
   from_port      = 0
   to_port        = 0
@@ -93,21 +99,18 @@ resource "aws_subnet" "public_subnet" {
   cidr_block        = cidrsubnet(var.vpc_cidr, 8, index(var.az_names, each.value))
   availability_zone = each.value
 
-  tags = {
-    // default tag로 묶어도 좋을듯
-    Name        = "${var.service_name}-public-${each.value}"
-    Environment = var.environment
-  }
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-public-subnet"
+  })
 }
 
 # NAT Gateway for outbound internet access from private subnets
 resource "aws_eip" "nat" {
   domain = "vpc"
 
-  tags = {
-    Name        = "${var.service_name}-nat-eip"
-    Environment = var.environment
-  }
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-eip"
+  })
 }
 
 resource "aws_nat_gateway" "nat" {
@@ -115,20 +118,18 @@ resource "aws_nat_gateway" "nat" {
   subnet_id     = aws_subnet.public_subnet[var.az_names[0]].id
   depends_on    = [aws_internet_gateway.igw]
 
-  tags = {
-    Name        = "${var.service_name}-nat-gw"
-    Environment = var.environment
-  }
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-nat"
+  })
 }
 
 # Private Route Table
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.this.id
 
-  tags = {
-    Name        = "${var.service_name}-rtb-private"
-    Environment = var.environment
-  }
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-private-rt"
+  })
 }
 
 # 0.0.0.0/0 -> NAT Gateway for private subnets
@@ -150,10 +151,9 @@ resource "aws_subnet" "was_private_subnet" {
   cidr_block        = cidrsubnet(var.vpc_cidr, 8, 110 + index(var.az_names, each.value))
   availability_zone = each.value
 
-  tags = {
-    Name        = "${var.service_name}-was-private-subnet-${each.value}"
-    Environment = var.environment
-  }
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-was-private-subnet"
+  })
 }
 
 resource "aws_subnet" "db_private_subnet" {
@@ -162,8 +162,7 @@ resource "aws_subnet" "db_private_subnet" {
   cidr_block        = cidrsubnet(var.vpc_cidr, 8, 120 + index(var.az_names, each.value))
   availability_zone = each.value
 
-  tags = {
-    Name        = "${var.service_name}-db-private-subnet-${each.value}"
-    Environment = var.environment
-  }
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-db-private-subnet"
+  })
 }
